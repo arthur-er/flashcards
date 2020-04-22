@@ -1,2 +1,0 @@
-# flashcards
-React flashcards app
