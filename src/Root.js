@@ -3,9 +3,10 @@ import { makeStyles } from "@material-ui/core/styles";
 import AppBar from "./components/AppBar";
 import Modal from "./components/Modal";
 import Flashcard from "./components/Flashcard";
-import CardFlip from "react-card-flip";
 import { Fab } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
+
+import Dexie from "dexie";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -24,47 +25,34 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Root(content) {
+export default function Root() {
   const classes = useStyles();
-  const [flip, setFlip] = useState(false);
-  const [open, setOpen] = useState(false);
-  const [category, setCategory] = useState("");
+  const db = new Dexie("flashcards");
 
-  const handleCategory = (event) => {
-    setCategory(event.target.value);
-  };
-  const toggleFlip = () => setFlip(!flip);
+  db.version(1).stores({
+    flashcards: "++id, question, question_content, answer, answer_content",
+  });
+
+  const [flashcards, setFlashcards] = useState([]);
+  const [open, setOpen] = useState(false);
   const toggleDialog = () => setOpen(!open);
 
+  const loadFlashcards = async () => {
+    setFlashcards(await db.flashcards.reverse().toArray());
+  };
+
+  loadFlashcards();
   return (
     <div className={classes.root}>
       <AppBar />
       <main className={classes.content}>
-        <CardFlip isFlipped={flip} flipDirection="vertical">
-          <Flashcard
-            flipHandler={toggleFlip}
-            post={{
-              title: "Como ocorreu a revolução inglesa?",
-              category: "História",
-              content: "lorem10",
-            }}
-          />
-          <Flashcard
-            flipHandler={toggleFlip}
-            post={{
-              title: "Como ocorreu a revolução inglesa?",
-              category: "História",
-              content: "lorem9",
-            }}
-          />
-        </CardFlip>
+        {flashcards.map((flashcard) => (
+          <Flashcard key={flashcard.id} flashcard={flashcard} />
+        ))}
         <Fab onClick={toggleDialog} color="primary" className={classes.fab}>
           <AddIcon />
         </Fab>
-        <Modal
-          dialogHandler={{ open, close: toggleDialog }}
-          selectHandler={{ category, handleCategory }}
-        />
+        <Modal dialogHandler={{ open, close: toggleDialog }} db={db} />
       </main>
     </div>
   );

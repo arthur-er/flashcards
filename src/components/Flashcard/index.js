@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
+import CardFlip from "react-card-flip";
 import {
   Typography,
   Card,
@@ -11,44 +12,66 @@ import {
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
-  },
-  menuButton: {
-    marginRight: theme.spacing(2),
+    marginBottom: theme.spacing(2),
   },
   title: {
     flexGrow: 1,
+    marginBottom: theme.spacing(2),
   },
   button: {
     flexGrow: 1,
   },
 }));
 
-export default function Flashcard({ flipHandler, post }) {
+export default function Flashcard({ flashcard }) {
   const classes = useStyles();
+  const [flip, setFlip] = useState(false);
+  const flipHandler = () => {
+    setFlip(!flip);
+  };
 
   return (
-    <Card className={classes.root}>
-      <CardContent>
-        <Typography color="textSecondary" gutterBottom>
-          {post.category}
-        </Typography>
-        <Typography variant="h5" component="h2">
-          {post.title}
-        </Typography>
-        <Typography variant="body2" component="p">
-          {post.content}
-        </Typography>
-      </CardContent>
-      <CardActions>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={flipHandler}
-          className={classes.button}
-        >
-          Ver resposta
-        </Button>
-      </CardActions>
-    </Card>
+    <CardFlip isFlipped={flip} flipDirection="vertical">
+      <Card className={classes.root}>
+        <CardContent>
+          <Typography variant="h5" className={classes.title} component="h2">
+            {flashcard.question}
+          </Typography>
+          <Typography variant="body2" component="p">
+            {flashcard.question_content}
+          </Typography>
+        </CardContent>
+        <CardActions>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={flipHandler}
+            className={classes.button}
+          >
+            Ver resposta
+          </Button>
+        </CardActions>
+      </Card>
+      <Card className={classes.root}>
+        <CardContent>
+          <Typography variant="h5" className={classes.title} component="h2">
+            {flashcard.answer}
+          </Typography>
+          <Typography variant="body2" component="p">
+            {flashcard.answer_content}
+          </Typography>
+        </CardContent>
+        <CardActions>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={flipHandler}
+            className={classes.button}
+          >
+            Ver pergunta
+          </Button>
+        </CardActions>
+      </Card>
+    </CardFlip>
   );
 }

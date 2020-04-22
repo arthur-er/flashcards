@@ -1,18 +1,44 @@
 import React from "react";
+import { makeStyles } from "@material-ui/core/styles";
+import { useForm } from "react-hook-form";
 import {
   Button,
   Dialog,
   DialogTitle,
   DialogContent,
-  InputLabel,
-  Select,
-  MenuItem,
   TextField,
   DialogActions,
-  Grid,
 } from "@material-ui/core";
 
-export default function Modal({ dialogHandler, selectHandler }) {
+const useStyles = makeStyles((theme) => ({
+  button: {
+    flexGrow: 1,
+  },
+  form: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "stretch",
+  },
+}));
+
+export default function Modal({ dialogHandler, db }) {
+  const classes = useStyles();
+  const { register, handleSubmit } = useForm();
+  const createFlashcard = async ({
+    question,
+    question_content,
+    answer,
+    answer_content,
+  }) => {
+    db.flashcards.add({
+      question,
+      question_content,
+      answer,
+      answer_content,
+    });
+    dialogHandler.close();
+  };
+
   return (
     <Dialog
       open={dialogHandler.open}
@@ -22,42 +48,55 @@ export default function Modal({ dialogHandler, selectHandler }) {
     >
       <DialogTitle id="form-dialog-title">Criar novo Flashcard</DialogTitle>
       <DialogContent>
-        <Grid container direction="column" alignItems="stretch">
-          <InputLabel id="categoria-label">Categoria</InputLabel>
-          <Select
-            labelId="categoria-label"
-            id="categoria-select"
-            value={selectHandler.category}
-            onChange={selectHandler.handleCategory}
-          >
-            <MenuItem value="historia">História</MenuItem>
-            <MenuItem value="geografia">Geografia</MenuItem>
-          </Select>
+        <form
+          className={classes.form}
+          onSubmit={handleSubmit(createFlashcard)}
+          id="flashcard-form"
+        >
           <TextField
             autoFocus
             margin="dense"
-            id="pergunta"
+            name="question"
             label="Pergunta"
             type="text"
+            inputRef={register}
           />
           <TextField
             autoFocus
             margin="dense"
-            id="pergunta"
+            name="question_content"
+            label="Conteudo da pergunta"
+            type="text"
+            inputRef={register}
+          />
+          <TextField
+            autoFocus
+            margin="dense"
+            name="answer"
             label="Resposta"
             type="text"
+            inputRef={register}
           />
           <TextField
             autoFocus
             margin="dense"
-            id="pergunta"
+            name="answer_content"
             label="Conteudo da resposta"
             type="text"
+            inputRef={register}
           />
-        </Grid>
+        </form>
       </DialogContent>
       <DialogActions>
-        <Button>Criar Flashcard</Button>
+        <Button
+          color="primary"
+          type="submit"
+          form="flashcard-form"
+          variant="contained"
+          className={classes.button}
+        >
+          Criar Flashcard
+        </Button>
       </DialogActions>
     </Dialog>
   );
